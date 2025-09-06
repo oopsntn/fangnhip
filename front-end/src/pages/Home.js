@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Container, Row, Col, Card, Spinner, Button, ListGroup, FormControl, Table, ButtonGroup } from "react-bootstrap";
 import axios from "axios";
 import DynamicBackground from "../components/DynamicBackgroud";
@@ -21,6 +21,57 @@ export default function Home() {
                 setLoading(false);
             });
     }, []);
+    const playTrack = useCallback((track) => {
+        setCurrentTrack(track);
+
+    }, [])
+
+    const getCurrentIndex = useCallback(() => {
+        return items.findIndex(i => i.id === currentTrack?.id)
+    }, [items, currentTrack]);
+
+    //Bài tiếp theo
+    const playNext = useCallback(() => {
+        if (!items.length) return;
+        let nextIndex;
+        if (shuffle) {
+            nextIndex = Math.floor(Math.random() * items.length);
+        } else {
+            const currentIndex = getCurrentIndex();
+            nextIndex = (currentIndex + 1) % items.length;
+        }
+        playTrack(items[nextIndex]);
+    }, [items, shuffle, getCurrentIndex, playTrack]);
+
+    // Quay lại bài trước
+    const playPrev = useCallback(() => {
+        if (!items.length) return;
+        const currentIndex = getCurrentIndex();
+        const prevIndex = (currentIndex - 1 + items.length) % items.length;
+        playTrack(items[prevIndex]);
+    }, [items, getCurrentIndex, playTrack]);
+
+    const togglePlayPause = useCallback(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        if (audio.paused) {
+            audio.play();
+        } else {
+            audio.pause();
+        }
+    }, []);
+    
+    useEffect(() => {
+        if (currentTrack && audioRef.current) {
+            const audio = audioRef.current;
+            audio.src = currentTrack.url;
+            audio.load();
+            audio.onloadedmetadata = () => {
+                audio.play().catch(console.error);
+            };
+        }
+    }, [currentTrack]);
     // Lắng nghe sự kiện audio
     useEffect(() => {
         const audio = audioRef.current;
@@ -46,7 +97,7 @@ export default function Home() {
             audio.removeEventListener("pause", handlePause);
             audio.removeEventListener("ended", handleEnded);
         };
-    }, [repeat, shuffle, items, currentTrack]);
+    }, [repeat, shuffle, items, currentTrack, playNext]);
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -107,40 +158,6 @@ export default function Home() {
         setfilterSearch(e.target.value)
     }
 
-    const playTrack = (track) => {
-        setCurrentTrack(track);
-        if (audioRef.current) {
-            audioRef.current.src = track.url;
-            audioRef.current.load();
-            audioRef.current.onloadedmetadata = () => {
-                audioRef.current.play();
-            };
-        }
-    };
-
-    const getCurrentIndex = () => items.findIndex(i => i.id === currentTrack?.id);
-
-    //Bài tiếp theo
-    const playNext = () => {
-        if (!items.length) return;
-        let nextIndex;
-        if (shuffle) {
-            nextIndex = Math.floor(Math.random() * items.length);
-        } else {
-            const currentIndex = getCurrentIndex();
-            nextIndex = (currentIndex + 1) % items.length;
-        }
-        playTrack(items[nextIndex]);
-    };
-
-    // Quay lại bài trước
-    const playPrev = () => {
-        if (!items.length) return;
-        const currentIndex = getCurrentIndex();
-        const prevIndex = (currentIndex - 1 + items.length) % items.length;
-        playTrack(items[prevIndex]);
-    };
-
     return (
         <div style={{ position: "relative", minHeight: "100vh" }}>
             <DynamicBackground track={currentTrack} />
@@ -155,7 +172,7 @@ export default function Home() {
                     <Table hover border={1} className="table-glass text-white">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th style={{ width: "80px" }}>#</th>
                                 <th>Title</th>
                                 <th>Artist</th>
                                 <th>Album</th>
@@ -167,7 +184,7 @@ export default function Home() {
                             {filterMusic.map((i) => (
                                 <tr md={4} key={i.id} onClick={() => playTrack(i)} style={{ cursor: 'pointer' }} >
                                     <td>
-                                        <Card.Img src={i.albumArtUrl} loading="lazy" width="60" height="60" style={{ borderRadius: "15px" }}/>
+                                        <img src={i.albumArtUrl} loading="lazy" width="50px" height="50px" className="album-art" alt={`${i.title} album art`} />
                                     </td>
                                     <td>{i.title}</td>
                                     <td>{i.artist}<br /></td>
@@ -186,7 +203,10 @@ export default function Home() {
                         <Card.Body>
                             <Row>
                                 <Col md={2}>
-                                    <img src={currentTrack.albumArtUrl} alt="Album Art" style={{ width: "100%", borderRadius: "15px" }} />
+                                    <img src={currentTrack.albumArtUrl}
+                                        alt="Album Art"
+                                        width="100%"
+                                        className="album-art" />
                                 </Col>
                                 <Col md={10}>
                                     <h5>{currentTrack.title}</h5>
@@ -195,13 +215,7 @@ export default function Home() {
                                     <ButtonGroup className="mt-2">
                                         <Button variant="secondary" onClick={playPrev}>⏮</Button>
                                         <Button variant={isPlaying ? "danger" : "success"}
-                                            onClick={() => {
-                                                if (isPlaying) {
-                                                    audioRef.current.pause();
-                                                } else {
-                                                    audioRef.current.play();
-                                                }
-                                            }}>
+                                            onClick={togglePlayPause}>
                                             {isPlaying ? "⏸" : "▶"}
                                         </Button>
                                         <Button variant="secondary" onClick={playNext}>⏭</Button>
