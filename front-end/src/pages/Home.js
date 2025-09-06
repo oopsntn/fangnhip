@@ -13,6 +13,7 @@ export default function Home() {
     const [repeat, setRepeat] = useState(false);
     const [shuffle, setShuffle] = useState(false);
     const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
+    const [isFullPlayer, setIsFullPlayer] = useState(false);
 
     useEffect(() => {
         axios.get("http://localhost:9999/items")
@@ -61,7 +62,6 @@ export default function Home() {
             audio.pause();
         }
     }, []);
-    
     useEffect(() => {
         if (currentTrack && audioRef.current) {
             const audio = audioRef.current;
@@ -198,20 +198,60 @@ export default function Home() {
                 </Row>
 
                 {/* Music Player */}
-                {currentTrack && (
-                    <Card className="mt-4 sticky-bottom shadow-lg">
+                {currentTrack && !isFullPlayer && (
+                    <Card
+                        className="mt-4 sticky-bottom shadow-lg"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setIsFullPlayer(true)}
+                    >
                         <Card.Body>
-                            <Row>
-                                <Col md={2}>
+                            <Row className="align-items-center">
+                                <Col xs={1}>
                                     <img src={currentTrack.albumArtUrl}
                                         alt="Album Art"
-                                        width="100%"
+                                        width="50" height="50"
                                         className="album-art" />
                                 </Col>
-                                <Col md={10}>
-                                    <h5>{currentTrack.title}</h5>
+                                <Col xs={4}>
+                                    <div><strong>{currentTrack.title}</strong></div>
+                                    <div style={{ fontSize: "0.9em" }}>{currentTrack.artist}</div>
+                                </Col>
+                                <Col xs={4} className="text-center">
+                                    <Button variant="secondary" onClick={(e) => { e.stopPropagation(); playPrev(); }}>⏮</Button>
+                                    <Button variant={isPlaying ? "danger" : "success"}
+                                        onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}>
+                                        {isPlaying ? "⏸" : "▶"}
+                                    </Button>
+                                    <Button variant="secondary" onClick={(e) => { e.stopPropagation(); playNext(); }}>⏭</Button>
+                                </Col>
+                                <Col xs={3} className="text-end">
+                                    <Button variant={repeat ? "warning" : "outline-warning"} onClick={(e) => { e.stopPropagation(); setRepeat(!repeat); }}>
+                                        🔁
+                                    </Button>
+                                    <Button variant={shuffle ? "info" : "outline-info"} onClick={(e) => { e.stopPropagation(); setShuffle(!shuffle); }}>
+                                        🔀
+                                    </Button>
+                                    <FormControl type="range" min={0} max={1} step={0.01}
+                                        style={{ width: "100px", display: "inline-block" }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        onChange={(e) => { audioRef.current.volume = e.target.value; }}
+                                    />
+                                </Col>
+                            </Row>
+                        </Card.Body>
+                    </Card>
+                )}
+                {currentTrack && isFullPlayer && (
+                    <div className="fullscreen-overlay">
+                        <Container>
+                            <Button variant="light" className="mb-2" onClick={() => setIsFullPlayer(false)}>⬇ Thu nhỏ</Button>
+                            <Row>
+                                {/* Album art bên trái */}
+                                <Col md={5} className="text-center">
+                                    <img src={currentTrack.albumArtUrl} alt="Album Art"
+                                        style={{ maxWidth: "100%", borderRadius: "12px" }} />
+                                    <h5 className="mt-3">{currentTrack.title}</h5>
                                     <p>{currentTrack.artist} — {currentTrack.album}</p>
-                                    <audio ref={audioRef} controls style={{ width: "100%" }} />
                                     <ButtonGroup className="mt-2">
                                         <Button variant="secondary" onClick={playPrev}>⏮</Button>
                                         <Button variant={isPlaying ? "danger" : "success"}
@@ -219,28 +259,24 @@ export default function Home() {
                                             {isPlaying ? "⏸" : "▶"}
                                         </Button>
                                         <Button variant="secondary" onClick={playNext}>⏭</Button>
-                                        <Button variant={repeat ? "warning" : "outline-warning"} onClick={() => setRepeat(!repeat)}>
-                                            🔁
-                                        </Button>
-                                        <Button variant={shuffle ? "info" : "outline-info"} onClick={() => setShuffle(!shuffle)}>
-                                            🔀
-                                        </Button>
-                                    </ButtonGroup><br />
-                                    <strong>Composer:</strong> {currentTrack.composer?.join(", ")}<br />
-                                    <strong>Channels:</strong> {currentTrack.nrAudioChannels}<br />
-                                    <strong>Quality:</strong><br />
-                                    - <strong>Label: </strong>{currentTrack.quality?.label}<br />
-                                    - <strong>bitDepth: </strong>{currentTrack.quality?.bitDepth}<br />
-                                    - <strong>bitrate: </strong>{currentTrack.quality?.bitrate}<br />
-                                    - <strong>Encoding:</strong> {currentTrack.quality?.encoding} <br />
-                                    - <strong>Tier: </strong> {currentTrack.quality?.tier}
+                                        <Button variant={repeat ? "warning" : "outline-warning"} onClick={() => setRepeat(!repeat)}>🔁</Button>
+                                        <Button variant={shuffle ? "info" : "outline-info"} onClick={() => setShuffle(!shuffle)}>🔀</Button>
+                                    </ButtonGroup>
+                                </Col>
+
+                                {/* Lyric bên phải */}
+                                <Col md={7}>
                                     {currentTrack?.lyrics?.[0]?.syncText?.length > 0 && (
-                                        <ListGroup id="lyrics-container" variant="flush" className="mt-3" style={{ maxHeight: "200px", overflowY: "auto" }}>
+                                        <ListGroup id="lyrics-container" variant="flush"
+                                            style={{ maxHeight: "70vh", overflowY: "auto" }}>
                                             {currentTrack.lyrics[0].syncText.map((line, idx) => (
                                                 <ListGroup.Item
                                                     id={`lyric-${idx}`}
                                                     key={idx}
-                                                    style={{ color: idx === currentLyricIndex ? "red" : "black" }}
+                                                    style={{
+                                                        color: idx === currentLyricIndex ? "red" : "black",
+                                                        fontWeight: idx === currentLyricIndex ? "bold" : "normal"
+                                                    }}
                                                 >
                                                     {line.text}
                                                 </ListGroup.Item>
@@ -249,10 +285,13 @@ export default function Home() {
                                     )}
                                 </Col>
                             </Row>
-                        </Card.Body>
-                    </Card>
+                    </Container>
+                    </div>
+                    
                 )}
             </Container>
+            <audio ref={audioRef} style={{ display: "none" }} />
         </div>
+        
     );
 }

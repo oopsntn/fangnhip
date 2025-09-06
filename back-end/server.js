@@ -297,7 +297,7 @@ const transformDIDLData = async (didl, includeMetadata = false) => {
         genre: item.genre,
         nrAudioChannels: item.nrAudioChannels,
         // trackNumber: item.trackNumber,
-          albumArtUrl: null,
+          albumArtUrl: `http://localhost:${PORT}/public/default.png`,
         };
         try {
           const albumArt = await getAlbumArtUnified(item.url);

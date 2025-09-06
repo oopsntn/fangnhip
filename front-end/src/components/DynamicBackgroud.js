@@ -1,4 +1,8 @@
 export default function DynamicBackground({ track }) {
+    const imageUrl = track?.albumArtUrl 
+        ? track.albumArtUrl.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29')
+        : null;
+    
     return (
         <div
             style={{
@@ -7,8 +11,8 @@ export default function DynamicBackground({ track }) {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                background: track
-                    ? `url(${track.albumArtUrl}) center/cover no-repeat`
+                background: imageUrl
+                    ? `url(${imageUrl}) center/cover no-repeat`
                     : "#3399FF",
                 filter: track ? "blur(20px)" : "none",
                 opacity: 0.6,

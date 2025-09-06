@@ -152,8 +152,7 @@
   accent-color: #fff;
 }
 .album-art {
-
-  border-radius: 16px;
+  border-radius: 22%;
   box-shadow: 0 8px 20px rgba(0,0,0,0.3);
   object-fit: cover;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -163,4 +162,15 @@
   transform: scale(1.05);
   box-shadow: 0 12px 30px rgba(0,0,0,0.4);
   cursor: pointer; /* thêm con trỏ pointer khi hover */
+}
+.fullscreen-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 9999;
+  color: white;
+  overflow-y: auto;
 }
