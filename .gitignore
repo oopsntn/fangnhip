@@ -12,7 +12,7 @@ front-end/.env.*.local
 back-end/dist/
 back-end/lib/
 back-end/tmp/
-back-end/public
+back-end/public/album-art
 back-end/database.json
 front-end/build/
 front-end/.cache/
