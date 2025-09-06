@@ -12,6 +12,8 @@ front-end/.env.*.local
 back-end/dist/
 back-end/lib/
 back-end/tmp/
+back-end/build
+back-end/database.json
 front-end/build/
 front-end/.cache/
 front-end/dist/
