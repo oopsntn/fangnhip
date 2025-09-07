@@ -190,7 +190,7 @@ const getAudioMetadata = async (url) => {
   try {
     const response = await fetchWithTimeout(url, {
       headers: {
-        'Range': 'bytes=0-4095' // 4KB đầu file
+        'Range': 'bytes=0-40095' // 4KB đầu file
       },
       timeout: 5000
     });

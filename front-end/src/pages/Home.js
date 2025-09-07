@@ -180,6 +180,14 @@ export default function Home() {
         const s = Math.floor(seconds % 60).toString().padStart(2, "0");
         return `${m}:${s}`;
     };
+    const encodeImageUrl = (url) => {
+    return url
+        ?.replace(/\s/g, '%20')
+        .replace(/\(/g, '%28')
+        .replace(/\)/g, '%29')
+        .replace(/#/g, '%23');
+};
+
     return (
         <div style={{ position: "relative", minHeight: "100vh" }} >
             <DynamicBackground track={currentTrack} />
@@ -206,7 +214,7 @@ export default function Home() {
                             {filterMusic.map((i) => (
                                 <tr md={4} key={i.id} onClick={() => playTrack(i)} style={{ cursor: 'pointer' }} >
                                     <td>
-                                        <img src={i.albumArtUrl} loading="lazy" width="50px" height="50px" className="album-art" alt={`${i.title} album art`} />
+                                        <img src={encodeImageUrl(i.albumArtUrl)} loading="lazy" width="50px" height="50px" className="album-art" alt={`${i.title} album art`} />
                                     </td>
                                     <td>{i.title}</td>
                                     <td>{i.artist}<br /></td>
@@ -230,7 +238,7 @@ export default function Home() {
                             <Row className="align-items-center">
 
                                 <Col xs="auto">
-                                    <img src={currentTrack.albumArtUrl}
+                                    <img src={encodeImageUrl(currentTrack.albumArtUrl)}
                                         alt="Album Art"
                                         width="50" height="50"
                                         className="album-art" />
@@ -300,7 +308,7 @@ export default function Home() {
                             <Row className="mb-3">
                                 {/* Album art bên trái */}
                                 <Col md={5} className="text-center">
-                                    <img src={currentTrack.albumArtUrl} alt="Album Art"
+                                    <img src={encodeImageUrl(currentTrack.albumArtUrl)} alt="Album Art"
                                         style={{ maxWidth: "90%", borderRadius: "20px", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }} />
 
                                     <h4 className="mt-4 fw-bold">{currentTrack.title}</h4>

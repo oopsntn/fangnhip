@@ -1,8 +1,10 @@
 export default function DynamicBackground({ track }) {
     const imageUrl = track?.albumArtUrl 
-        ? track.albumArtUrl.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29')
+        ? track.albumArtUrl.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/#/g, '%23')
         : null;
-    
+    // const imageUrl = track?.albumArtUrl 
+    // ? encodeURIComponent(track.albumArtUrl)
+    // : null;
     return (
         <div
             style={{
