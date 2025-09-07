@@ -165,12 +165,64 @@
 }
 .fullscreen-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
-  z-index: 9999;
+  inset: 0;
+  background: rgba(0,0,0,0.7); /* nền tối */
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   color: white;
+  z-index: 1050;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  padding-top: 5vh;
   overflow-y: auto;
 }
+.progress-bar-custom {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    white var(--progress, 0%),
+    #555 var(--progress, 0%)
+  );
+  outline: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+/* Thumb mặc định ẩn */
+.progress-bar-custom::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  opacity: 0; /* Ẩn */
+  transition: opacity 0.2s ease;
+}
+
+.progress-bar-custom::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Khi hover/focus thì thumb hiện */
+.progress-bar-custom:hover::-webkit-slider-thumb,
+.progress-bar-custom:focus::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.progress-bar-custom:hover::-moz-range-thumb,
+.progress-bar-custom:focus::-moz-range-thumb {
+  opacity: 1;
+}
+
