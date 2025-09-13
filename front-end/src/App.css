@@ -3,7 +3,7 @@
   backdrop-filter: blur(10px); /* làm mờ nền phía sau */
   -webkit-backdrop-filter: blur(10px);
   border-radius: 12px;
-  overflow: hidden;
+  /* overflow: hidden; */
   border: 1px solid rgba(255,255,255,0.3);
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
@@ -12,6 +12,7 @@
 .table-glass tr,
 .table-glass th,
 .table-glass td {
+  position: sticky;
   background-color: transparent !important;
   color: #fff;
   border: none;

@@ -18,6 +18,7 @@ export default function Home() {
     const [isFullPlayer, setIsFullPlayer] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+
     useEffect(() => {
         axios.get("http://localhost:9999/items")
             .then((res) => {
@@ -181,26 +182,31 @@ export default function Home() {
         return `${m}:${s}`;
     };
     const encodeImageUrl = (url) => {
-    return url
-        ?.replace(/\s/g, '%20')
-        .replace(/\(/g, '%28')
-        .replace(/\)/g, '%29')
-        .replace(/#/g, '%23');
-};
+        return url
+            ?.replace(/\s/g, '%20')
+            .replace(/\(/g, '%28')
+            .replace(/\)/g, '%29')
+            .replace(/#/g, '%23');
+    };
 
     return (
-        <div style={{ position: "relative", minHeight: "100vh" }} >
+        <div
+        // style={{ position: "relative", minHeight: "100vh" }} 
+        >
             <DynamicBackground track={currentTrack} />
 
             <Container className="mt-3">
-                <Row className="mb-3">
-                    <Col md={3}>
-                        <FormControl onChange={handleSearchChange} value={filterSearch} type="text" placeholder="Enter search title" />
-                    </Col>
-                </Row>
                 <Row>
-                    <Table hover border={1} className="table-glass text-white">
-                        <thead>
+                    <Col className="mb-3 sticky-top ">
+                        <FormControl onChange={handleSearchChange} value={filterSearch} type="text" placeholder="Enter search title" style={{ background: "gray" }} />
+                    </Col>
+                    <Table
+                        hover
+                        border={1}
+                        className="
+                        table-glass 
+                        text-white">
+                        <thead className="sticky-top bg-dark">
                             <tr>
                                 <th style={{ width: "80px" }}>#</th>
                                 <th>Title</th>
@@ -226,39 +232,73 @@ export default function Home() {
                         </tbody>
                     </Table>
                 </Row>
-
-                {/* Music Player */}
+            </Container>
+            <div className="sticky-bottom ">
                 {currentTrack && !isFullPlayer && (
                     <Card
-                        className="mt-4 sticky-bottom shadow-lg"
-                        style={{ cursor: "pointer" }}
+                        className="sticky-bottom "
+                        style={{ cursor: "pointer", background: "gray" }}
                         onClick={() => setIsFullPlayer(true)}
                     >
                         <Card.Body>
                             <Row className="align-items-center">
-
                                 <Col xs="auto">
                                     <img src={encodeImageUrl(currentTrack.albumArtUrl)}
                                         alt="Album Art"
                                         width="50" height="50"
                                         className="album-art" />
                                 </Col>
-
-                                <Col className="text-truncate">
+                                <Col xs="auto" className="text-truncate">
                                     <div className="fw-bold text-truncate">{currentTrack.title}</div>
-                                    <div className="small text-muted text-truncate">{currentTrack.artist}</div>
+                                    <div className="small text-muted text-truncate">{currentTrack.artist} - {currentTrack.quality?.label}</div>
                                 </Col>
 
-                                <Col xs="auto" className="text-center">
+
+                                {/* <Col xs="auto" className="text-center">
                                     <Button variant="secondary" className="mx-1" onClick={(e) => { e.stopPropagation(); playPrev(); }}><FaStepBackward /></Button>
                                     <Button variant={isPlaying ? "danger" : "success"} className="mx-1"
                                         onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}>
                                         {isPlaying ? <FaPause /> : <FaPlay />}
                                     </Button>
                                     <Button variant="secondary" className="mx-1" onClick={(e) => { e.stopPropagation(); playNext(); }}><FaStepForward /></Button>
-                                </Col>
+                                </Col> */}
+                                <div className="d-flex justify-content-center align-items-center gap-4 mb-2">
+                                    <Button
+                                        variant="link"
+                                        onClick={() => setShuffle(!shuffle)}
+                                        style={{ color: shuffle ? "#1DB954" : "white" }}
+                                    >
+                                        <FaRandom size={20} />
+                                    </Button>
+                                    <Button variant="link" onClick={playPrev} style={{ color: "white" }}>
+                                        <FaStepBackward size={24} />
+                                    </Button>
+                                    <Button
+                                        variant="light"
+                                        onClick={togglePlayPause}
+                                        style={{ borderRadius: "50%", width: "60px", height: "60px" }}
+                                    >
+                                        {isPlaying ? <FaPause size={28} /> : <FaPlay size={28} />}
+                                    </Button>
+                                    <Button variant="link" onClick={playNext} style={{ color: "white" }}>
+                                        <FaStepForward size={24} />
+                                    </Button>
+                                    <Button
+                                        variant="link"
+                                        onClick={() => setRepeat(!repeat)}
+                                        style={{ color: repeat ? "#1DB954" : "white" }}
+                                    >
+                                        <FaRedo size={20} />
+                                    </Button>
+                                    <FormRange
 
-                                <Col xs="auto" className="ms-auto">
+                                        min={0} max={1} step={0.01}
+                                        style={{ width: "100px", display: "inline-block", verticalAlign: "middle" }}
+                                        onClick={(e) => e.stopPropagation()}
+                                        onChange={(e) => { audioRef.current.volume = e.target.value; }}
+                                    />
+                                </div>
+                                {/* <Col xs="auto" className="ms-auto">
                                     <div className="d-flex align-items-center gap-2">
                                         <Button variant={repeat ? "warning" : "outline-warning"} onClick={(e) => { e.stopPropagation(); setRepeat(!repeat); }}>
                                             <FaRedo />
@@ -273,29 +313,32 @@ export default function Home() {
                                             onChange={(e) => { audioRef.current.volume = e.target.value; }}
                                         />
                                     </div>
-                                </Col>
-                            </Row>
-                            <Row className="align-items-center mt-2">
-                                <Col xs="auto" className="small text-muted">
-                                    {formatTime(currentTime)}
-                                </Col>
-                                <Col>
-                                    <FormRange
+                                </Col> */}
+                                <div className="d-flex align-items-center gap-2 w-100 mb-3" >
+                                    {/* Thời gian hiện tại */}
+                                    <small style={{ width: "40px", textAlign: "right", color: "white" }}>
+                                        {formatTime(currentTime)}
+                                    </small>
+                                    {/* Thanh progress */}
+                                    <input type="range"
                                         min={0}
                                         max={duration || 0}
                                         step={0.1}
                                         value={currentTime}
-                                        onClick={(e) => e.stopPropagation()}
                                         onChange={(e) => {
                                             audioRef.current.currentTime = e.target.value;
                                             setCurrentTime(e.target.value);
                                         }}
+                                        style={{
+                                            "--progress": `${(currentTime / (duration || 1)) * 100}%`
+                                        }}
+                                        className="progress-bar-custom flex-grow-1"
                                     />
-                                </Col>
-                                <Col xs="auto" className="small text-muted">
-                                    {formatTime(duration)}
-                                </Col>
+                                    {/* Thời lượng tổng */}
+                                    <small style={{ width: "40px", color: "white" }}>{formatTime(duration)}</small>
+                                </div>
                             </Row>
+
                         </Card.Body>
                     </Card>
                 )}
@@ -309,11 +352,11 @@ export default function Home() {
                                 {/* Album art bên trái */}
                                 <Col md={5} className="text-center">
                                     <img src={encodeImageUrl(currentTrack.albumArtUrl)} alt="Album Art"
-                                        style={{ maxWidth: "90%", borderRadius: "20px", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }} />
+                                        style={{ height: "300px", width: "300px", maxWidth: "100%", borderRadius: "20px", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" }} />
 
-                                    <h4 className="mt-4 fw-bold">{currentTrack.title}</h4>
-                                    <p>{currentTrack.artist} — {currentTrack.album}</p>
-
+                                    <Card.Title className="mt-4 mb-3 fw-bold ">{currentTrack.title}</Card.Title>
+                                    <Card.Text>{currentTrack.artist} — {currentTrack.album}</Card.Text>
+                                    <Card.Text>{currentTrack.quality?.bitDepth} - {currentTrack.quality?.sampleRate} - {currentTrack.quality?.bitrate}</Card.Text>
                                     <div className="d-flex justify-content-center align-items-center gap-4 mb-2">
                                         <Button
                                             variant="link"
@@ -416,7 +459,10 @@ export default function Home() {
                         </Container>
                     </div>
                 )}
-            </Container>
+            </div>
+            {/* Music Player */}
+
+
             <audio ref={audioRef} style={{ display: "none" }} />
         </div>
 
