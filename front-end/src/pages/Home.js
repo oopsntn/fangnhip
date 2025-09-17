@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Container, Row, Col, Card, Spinner, Button, ListGroup, FormControl, Table } from "react-bootstrap";
 import axios from "axios";
-import { FaPlay, FaPause, FaStepBackward, FaStepForward, FaRedo, FaRandom, FaSortDown } from 'react-icons/fa';
+import { FaPlay, FaPause, FaStepBackward, FaStepForward, FaRedo, FaRandom, FaSortDown, FaVolumeUp, FaVolumeMute } from 'react-icons/fa';
 import DynamicBackground from "../components/DynamicBackgroud";
-import FormRange from "react-bootstrap/esm/FormRange";
 
 export default function Home() {
     const [items, setItems] = useState([]);
@@ -18,6 +17,9 @@ export default function Home() {
     const [isFullPlayer, setIsFullPlayer] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [volume, setVolume] = useState(0.6);
+    const [isMuted, setIsMuted] = useState(false);
+    const [lastVolume, setLastVolume] = useState(1);
 
     useEffect(() => {
         axios.get("http://localhost:9999/items")
@@ -138,6 +140,19 @@ export default function Home() {
         }
         return () => audio.removeEventListener("timeupdate", checkLyric);
     }, [currentTrack, currentLyricIndex]);
+    useEffect(() => {
+    const handleKeyDown = (e) => {
+        if (e.code === "Space") {
+            e.preventDefault(); // ngăn scroll khi bấm space
+            togglePlayPause();
+        }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+    };
+}, [togglePlayPause]);
 
     if (loading) {
         return (
@@ -181,6 +196,17 @@ export default function Home() {
         const s = Math.floor(seconds % 60).toString().padStart(2, "0");
         return `${m}:${s}`;
     };
+
+    // const toggleMute = () => {
+    //     if (isMuted) {
+    //         setVolume(lastVolume); // khôi phục volume trước khi mute
+    //     } else {
+    //         setLastVolume(volume); // lưu lại volume hiện tại
+    //         setVolume(0);
+    //     }
+    //     setIsMuted(!isMuted);
+    // };
+
     const encodeImageUrl = (url) => {
         return url
             ?.replace(/\s/g, '%20')
@@ -190,155 +216,213 @@ export default function Home() {
     };
 
     return (
-        <div
-        // style={{ position: "relative", minHeight: "100vh" }} 
-        >
+        <div>
             <DynamicBackground track={currentTrack} />
-
             <Container className="mt-3">
                 <Row>
-                    <Col className="mb-3 sticky-top ">
-                        <FormControl onChange={handleSearchChange} value={filterSearch} type="text" placeholder="Enter search title" style={{ background: "gray" }} />
+                    <Col className="mb-3">
+                        <FormControl onChange={handleSearchChange} value={filterSearch} type="text" placeholder="Enter search" style={{ background: "gray" }} />
                     </Col>
-                    <Table
-                        hover
-                        border={1}
-                        className="
-                        table-glass 
-                        text-white">
-                        <thead className="sticky-top bg-dark">
-                            <tr>
-                                <th style={{ width: "80px" }}>#</th>
-                                <th>Title</th>
-                                <th>Artist</th>
-                                <th>Album</th>
-                                <th>Duration</th>
-                                <th>Genre</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filterMusic.map((i) => (
-                                <tr md={4} key={i.id} onClick={() => playTrack(i)} style={{ cursor: 'pointer' }} >
-                                    <td>
-                                        <img src={encodeImageUrl(i.albumArtUrl)} loading="lazy" width="50px" height="50px" className="album-art" alt={`${i.title} album art`} />
-                                    </td>
-                                    <td>{i.title}</td>
-                                    <td>{i.artist}<br /></td>
-                                    <td>{i.album}<br /></td>
-                                    <td>{i.duration}<br /></td>
-                                    <td>{i.genre}<br /></td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </Table>
+                </Row>
+                <Row className="d-flex justify-content-center">
+                    <Col md={10} lg={8}>
+                        <div style={{ maxHeight: "85vh", overflowY: "auto" }} className="custom-scroll">
+                            <Table hover bordered className="table-glass text-white align-self-center mb-0">
+                                <thead className="bg-dark sticky-top">
+                                    <tr>
+                                        <th style={{ width: "72px" }}>#</th>
+                                        <th>Title</th>
+                                        <th>Artist</th>
+                                        <th className="d-none d-md-table-cell">Album</th>
+                                        <th className="d-none d-lg-table-cell">Duration</th>
+                                        <th className="d-none d-xl-table-cell">Genre</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filterMusic.map((i) => (
+                                        <tr key={i.id} onClick={() => playTrack(i)} style={{ cursor: "pointer" }}>
+                                            <td>
+                                                <img
+                                                    src={encodeImageUrl(i.albumArtUrl)}
+                                                    loading="lazy"
+                                                    width="50"
+                                                    height="50"
+                                                    className="album-art"
+                                                    alt={`${i.title} album art`}
+                                                />
+                                            </td>
+                                            <td>{i.title}</td>
+                                            <td>{i.artist}</td>
+                                            <td className="d-none d-md-table-cell">{i.album}</td>
+                                            <td className="d-none d-lg-table-cell">{i.duration}</td>
+                                            <td className="d-none d-xl-table-cell">{i.genre}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        </div>
+                    </Col>
+
                 </Row>
             </Container>
+
             <div className="sticky-bottom ">
+
                 {currentTrack && !isFullPlayer && (
                     <Card
-                        className="sticky-bottom "
-                        style={{ cursor: "pointer", background: "gray" }}
+                        style={{
+                            position: "fixed",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            background: "#181818",
+                            border: "none",
+                            cursor: "pointer",
+                            height: "72px", // nhỏ gọn hơn
+                        }}
                         onClick={() => setIsFullPlayer(true)}
                     >
-                        <Card.Body>
-                            <Row className="align-items-center">
-                                <Col xs="auto">
+                        <Card.Body className="py-2 px-3">
+                            <Row className="align-items-center text-white">
+                                <Col md={4} className="d-flex align-items-center">
                                     <img src={encodeImageUrl(currentTrack.albumArtUrl)}
                                         alt="Album Art"
-                                        width="50" height="50"
-                                        className="album-art" />
-                                </Col>
-                                <Col xs="auto" className="text-truncate">
-                                    <div className="fw-bold text-truncate">{currentTrack.title}</div>
-                                    <div className="small text-muted text-truncate">{currentTrack.artist} - {currentTrack.quality?.label}</div>
-                                </Col>
-
-
-                                {/* <Col xs="auto" className="text-center">
-                                    <Button variant="secondary" className="mx-1" onClick={(e) => { e.stopPropagation(); playPrev(); }}><FaStepBackward /></Button>
-                                    <Button variant={isPlaying ? "danger" : "success"} className="mx-1"
-                                        onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}>
-                                        {isPlaying ? <FaPause /> : <FaPlay />}
-                                    </Button>
-                                    <Button variant="secondary" className="mx-1" onClick={(e) => { e.stopPropagation(); playNext(); }}><FaStepForward /></Button>
-                                </Col> */}
-                                <div className="d-flex justify-content-center align-items-center gap-4 mb-2">
-                                    <Button
-                                        variant="link"
-                                        onClick={() => setShuffle(!shuffle)}
-                                        style={{ color: shuffle ? "#1DB954" : "white" }}
-                                    >
-                                        <FaRandom size={20} />
-                                    </Button>
-                                    <Button variant="link" onClick={playPrev} style={{ color: "white" }}>
-                                        <FaStepBackward size={24} />
-                                    </Button>
-                                    <Button
-                                        variant="light"
-                                        onClick={togglePlayPause}
-                                        style={{ borderRadius: "50%", width: "60px", height: "60px" }}
-                                    >
-                                        {isPlaying ? <FaPause size={28} /> : <FaPlay size={28} />}
-                                    </Button>
-                                    <Button variant="link" onClick={playNext} style={{ color: "white" }}>
-                                        <FaStepForward size={24} />
-                                    </Button>
-                                    <Button
-                                        variant="link"
-                                        onClick={() => setRepeat(!repeat)}
-                                        style={{ color: repeat ? "#1DB954" : "white" }}
-                                    >
-                                        <FaRedo size={20} />
-                                    </Button>
-                                    <FormRange
-
-                                        min={0} max={1} step={0.01}
-                                        style={{ width: "100px", display: "inline-block", verticalAlign: "middle" }}
-                                        onClick={(e) => e.stopPropagation()}
-                                        onChange={(e) => { audioRef.current.volume = e.target.value; }}
+                                        width="48" height="48"
+                                        className="album-art me-2"
                                     />
-                                </div>
-                                {/* <Col xs="auto" className="ms-auto">
-                                    <div className="d-flex align-items-center gap-2">
-                                        <Button variant={repeat ? "warning" : "outline-warning"} onClick={(e) => { e.stopPropagation(); setRepeat(!repeat); }}>
-                                            <FaRedo />
-                                        </Button>
-                                        <Button variant={shuffle ? "info" : "outline-info"} onClick={(e) => { e.stopPropagation(); setShuffle(!shuffle); }}>
-                                            <FaRandom />
-                                        </Button>
-                                        <FormRange
-                                            min={0} max={1} step={0.01}
-                                            style={{ width: "100px", display: "inline-block", verticalAlign: "middle" }}
-                                            onClick={(e) => e.stopPropagation()}
-                                            onChange={(e) => { audioRef.current.volume = e.target.value; }}
+                                    <div className="d-flex flex-column overflow-hidden">
+                                        <div className="fw-bold text-truncate" style={{ fontSize: "0.9rem" }}>{currentTrack.title}</div>
+                                        <div className="small text-truncate" style={{ fontSize: "0.75rem" }}>{currentTrack.artist} - {currentTrack.quality?.label}</div>
+                                    </div>
+                                </Col>
+                                <Col md={4} className="d-flex flex-column align-items-center">
+                                    <div className="d-flex justify-content-center align-items-center gap-4 mb-2">
+                                        <FaRandom
+                                            size={14}
+                                            style={{ color: shuffle ? "#1DB954" : "white" }}
+
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // chặn click lan ra Card
+                                                setShuffle(!shuffle);
+                                            }} />
+
+                                        <FaStepBackward
+                                            size={18}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                playPrev();
+                                            }}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                togglePlayPause();
+                                            }}
+                                            style={{
+                                                borderRadius: "50%",
+                                                width: "36px",
+                                                height: "36px",
+                                                background: "white",
+                                                border: "none",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            {isPlaying ? (
+                                                <FaPause size={16} color="black" />
+                                            ) : (
+                                                <FaPlay size={16} color="black" />
+                                            )}
+                                        </button>
+                                        <FaStepForward
+                                            size={18}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                playNext();
+                                            }}
+                                            style={{ cursor: "pointer" }}
+                                        />
+                                        <FaRedo
+                                            size={14}
+                                            style={{ color: repeat ? "#1DB954" : "white" }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setRepeat(!repeat);
+                                            }}
                                         />
                                     </div>
-                                </Col> */}
-                                <div className="d-flex align-items-center gap-2 w-100 mb-3" >
-                                    {/* Thời gian hiện tại */}
-                                    <small style={{ width: "40px", textAlign: "right", color: "white" }}>
-                                        {formatTime(currentTime)}
-                                    </small>
-                                    {/* Thanh progress */}
-                                    <input type="range"
+                                    <div className="d-flex align-items-center gap-2 w-100" >
+                                        {/* Thời gian hiện tại */}
+                                        <small style={{ fontSize: "0.7rem", width: "32px", textAlign: "right" }}>
+                                            {formatTime(currentTime)}
+                                        </small>
+                                        {/* Thanh progress */}
+                                        <input type="range"
+                                            min={0}
+                                            max={duration || 0}
+                                            step={0.1}
+                                            value={currentTime}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onChange={(e) => {
+                                                audioRef.current.currentTime = e.target.value;
+                                                setCurrentTime(e.target.value);
+                                            }}
+                                            style={{
+                                                "--progress": `${(currentTime / (duration || 1)) * 100}%`, height: "3px"
+                                            }}
+                                            className="progress-bar-custom flex-grow-1"
+                                        />
+                                        {/* Thời lượng tổng */}
+                                        <small style={{ fontSize: "0.7rem", width: "32px" }}>
+                                            {formatTime(duration)}
+                                        </small>
+                                    </div>
+                                </Col>
+                                <Col md={4} className="d-flex justify-content-end align-items-center">
+                                    {(isMuted || volume === 0) ? (
+                                        <FaVolumeMute
+                                            size={16}
+                                            style={{ cursor: "pointer", marginRight: "6px" }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsMuted(false);
+                                                setVolume(lastVolume || 1);
+                                                audioRef.current.volume = lastVolume || 1;
+                                            }}
+                                        />
+                                    ) : (
+                                        <FaVolumeUp
+                                            size={16}
+                                            style={{ cursor: "pointer", marginRight: "6px" }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setIsMuted(true);
+                                                setLastVolume(volume);
+                                                setVolume(0);
+                                                audioRef.current.volume = 0;
+                                            }}
+                                        />
+                                    )}
+                                    <input
+                                        type="range"
                                         min={0}
-                                        max={duration || 0}
-                                        step={0.1}
-                                        value={currentTime}
+                                        max={1}
+                                        step={0.01}
+                                        value={volume}
+                                        className="progress-bar-custom"
+                                        style={{ "--progress": `${volume * 100}%`, width: "90px" }}
+                                        onClick={(e) => e.stopPropagation()}
                                         onChange={(e) => {
-                                            audioRef.current.currentTime = e.target.value;
-                                            setCurrentTime(e.target.value);
+                                            const newVolume = parseFloat(e.target.value);
+                                            setVolume(newVolume);
+                                            audioRef.current.volume = newVolume;
+                                            if (newVolume > 0) setIsMuted(false);
                                         }}
-                                        style={{
-                                            "--progress": `${(currentTime / (duration || 1)) * 100}%`
-                                        }}
-                                        className="progress-bar-custom flex-grow-1"
                                     />
-                                    {/* Thời lượng tổng */}
-                                    <small style={{ width: "40px", color: "white" }}>{formatTime(duration)}</small>
-                                </div>
+                                </Col>
                             </Row>
-
                         </Card.Body>
                     </Card>
                 )}
@@ -461,8 +545,6 @@ export default function Home() {
                 )}
             </div>
             {/* Music Player */}
-
-
             <audio ref={audioRef} style={{ display: "none" }} />
         </div>
 
