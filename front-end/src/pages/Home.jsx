@@ -63,9 +63,9 @@ export default function Home() {
         const seconds = totalSeconds % 60;
         
         if (hours > 0) {
-            return `${hours}h ${minutes}m`;
+            return `${hours} giờ ${minutes} phút`;
         }
-        return `${minutes}m ${seconds}s`;
+        return `${minutes} phút ${seconds} giây`;
     };
 
     const playTrack = useCallback((track) => {
@@ -271,8 +271,7 @@ export default function Home() {
                 <Container fluid className="d-flex align-items-center justify-content-between">
                     {/* Logo + text */}
                     <div className="d-flex align-items-center gap-2 flex-shrink-0">
-                        <img src="/logo.png" style={{ height: "32px", cursor: "pointer" }} alt="logo"/>
-                        <span className="text-white d-none d-md-inline">fangnhip</span>
+                        <img src="/caramel-logo.png" style={{ height: "32px", cursor: "pointer" }} alt="logo"/>
                     </div>
 
                     {/* Middle: Home + Search */}

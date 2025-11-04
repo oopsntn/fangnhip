@@ -1,5 +1,4 @@
 import express from "express";
-import fetch from "node-fetch";
 import * as mm from 'music-metadata';
 import dotenv from "dotenv";
 import { XMLParser } from "fast-xml-parser";
@@ -236,7 +235,7 @@ const getAudioMetadata = async (url) => {
   try {
     const response = await fetchWithTimeout(url, {
       headers: {
-        'Range': 'bytes=0-900095' // 400KB đầu file
+        'Range': 'bytes=0-9000' // 400KB đầu file
       },
       timeout: 5000
     });
