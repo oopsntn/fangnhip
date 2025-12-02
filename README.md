@@ -1,11 +1,11 @@
-# 🎶 Caramel Music
+# 🎶 fangnhip
 
 [![Made with React](https://img.shields.io/badge/Frontend-React-61dafb?logo=react&logoColor=white)](https://react.dev/)
 [![Made with Express](https://img.shields.io/badge/Backend-Express-000000?logo=express&logoColor=white)](https://expressjs.com/)
 [![Music Quality](https://img.shields.io/badge/Hi--Res-Audio-orange?logo=spotify&logoColor=white)]()
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> **Caramel Music** là một dự án nghe nhạc chất lượng cao, stream trực tiếp từ **DLNA server** với các định dạng Hi-Res như **FLAC, WAV**, mang lại trải nghiệm âm thanh chân thực và mạnh mẽ 🎧.  
+> **fangnhip** là một dự án nghe nhạc chất lượng cao, stream trực tiếp từ **DLNA server** với các định dạng Hi-Res như **FLAC, WAV**, mang lại trải nghiệm âm thanh chân thực và mạnh mẽ 🎧.  
 <img width="430" height="467" alt="image" src="https://github.com/user-attachments/assets/4eb869a6-4ad7-4aab-95b8-2df54dbf635b" />
 
 ---
@@ -80,4 +80,4 @@ Tạo Pull Request.
 
 Dự án này sử dụng giấy phép MIT License – bạn được phép sử dụng, chỉnh sửa và phân phối.
 
-🎵 Caramel Music – nơi âm nhạc Hi-Res sống dậy cùng từng nhịp tim.
+🎵 fangnhip – nơi âm nhạc Hi-Res sống dậy cùng từng nhịp tim.
